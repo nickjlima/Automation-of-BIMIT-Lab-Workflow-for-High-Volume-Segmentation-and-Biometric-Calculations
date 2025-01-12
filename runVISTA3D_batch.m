@@ -8,6 +8,12 @@ fileIDs = {'file-id-1', 'file-id-2', 'file-id-3', ..., 'file-id-1000'};
 % Define batch size
 batchSize = 50;
 
+% Define the folder for saving segmentations
+localSaveFolder = 'ELIOR Segmentations';
+
+% Ensure the folder exists
+mkdir(localSaveFolder);
+
 % Loop through batches
 for batchStart = 1:batchSize:length(fileIDs)
     batchEnd = min(batchStart + batchSize - 1, length(fileIDs));
@@ -29,8 +35,11 @@ for batchStart = 1:batchSize:length(fileIDs)
             '-H "Content-Type: application/json" ', ...
             '-d ''{ "image": "image_%d.nii.gz", ', ...
             ' "prompts": { "classes": ["Spleen", "Liver"] } }'' ', ...
-            'http://localhost:8000/v1/vista3d/inference && unzip -o output_%d.zip -d output_%d && '], ...
-            batchStart + i - 1, batchStart + i - 1, batchStart + i - 1, batchStart + i - 1));
+            'http://localhost:8000/v1/vista3d/inference && unzip -o output_%d.zip -d output_%d && ' ...
+            'mkdir -p "%s" && mv output_%d/* "%s/" && '], ...
+            batchStart + i - 1, batchStart + i - 1, ...
+            batchStart + i - 1, batchStart + i - 1, ...
+            localSaveFolder, batchStart + i - 1, localSaveFolder));
     end
 
     % Combine download and processing commands
